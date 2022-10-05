@@ -4,8 +4,8 @@ const { Model, Validator } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
 	class User extends Model {
 		toSafeObject() {
-			const { id, username, email } = this; // context will be the User instance
-			return { id, username, email };
+			const { id, username, firstName, lastName, email } = this; // context will be the User instance
+			return { id, username, firstName, lastName, email };
 		}
 		validatePassword(password) {
 			return bcrypt.compareSync(password, this.hashedPassword.toString());
@@ -30,10 +30,12 @@ module.exports = (sequelize, DataTypes) => {
 			}
 		}
 
-		static async signup({ username, email, password }) {
+		static async signup({ username, firstName, lastName, email, password }) {
 			const hashedPassword = bcrypt.hashSync(password);
 			const user = await User.create({
 				username,
+				firstName,
+				lastName,
 				email,
 				hashedPassword,
 			});
@@ -50,12 +52,21 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.STRING,
 				allowNull: false,
 				validate: {
-					len: [4, 30],
-					isNotEmail(value) {
-						if (Validator.isEmail(value)) {
-							throw new Error('Cannot be an email.');
-						}
-					},
+					len: [3, 30],
+				},
+			},
+			firstName: {
+				type: DataTypes.STRING,
+				allowNull: false,
+				validate: {
+					len: [3, 30],
+				},
+			},
+			lastName: {
+				type: DataTypes.STRING,
+				allowNull: false,
+				validate: {
+					len: [3, 30],
 				},
 			},
 			email: {
